@@ -10,7 +10,11 @@ const array = [
   },
 ];
 
-const obj = array.reduce((accum, item) => {
+// Other options:
+// - Annotate `accum` parameter to reduce function argument
+// - Specify accumulator argument like `{} as Record<string, { name: string }>`
+// Matt Pocock prefers the featured solution: type annotation on .reduce
+const obj = array.reduce<Record<string, { name: string }>>((accum, item) => {
   accum[item.name] = item;
   return accum;
 }, {});

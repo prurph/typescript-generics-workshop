@@ -1,6 +1,11 @@
 import { it } from "vitest";
 import { Equal, Expect } from "../helpers/type-utils";
 
+function returnWhatIPassInExceptFor1(t: 1): 2;
+function returnWhatIPassInExceptFor1<T>(t: T): T;
+// You could use a generic here, but MP prefers unknown/unknown to convey
+// we don't know what's going to be passed in. Further, it exemplifies that
+// generics can be added to just some overloads to capture types.
 function returnWhatIPassInExceptFor1(t: unknown): unknown {
   if (t === 1) {
     return 2;

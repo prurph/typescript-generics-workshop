@@ -1,14 +1,17 @@
 import { expect, it } from "vitest";
 import { Equal, Expect } from "../helpers/type-utils";
 
-const fetchData = async (url: string) => {
-  const data = await fetch(url).then((response) => response.json());
+const fetchData = async <T>(url: string) => {
+  // Prefer annotation to cast on the line where the any is returned; as
+  // close to the source as possible.
+  const data: T = await fetch(url).then((response) => response.json());
+  // Instead of doing `return data as any`
   return data;
 };
 
 it("Should fetch data from an API", async () => {
   const data = await fetchData<{ name: string }>(
-    "https://swapi.dev/api/people/1",
+    "https://swapi.dev/api/people/1"
   );
   expect(data.name).toEqual("Luke Skywalker");
 

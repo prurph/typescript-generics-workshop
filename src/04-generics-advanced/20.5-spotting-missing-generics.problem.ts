@@ -1,6 +1,6 @@
 import { Equal, Expect } from "../helpers/type-utils";
 
-const getValue = <TObj>(obj: TObj, key: keyof TObj) => {
+const getValue = <O, K extends keyof O>(obj: O, key: K) => {
   return obj[key];
 };
 
@@ -17,7 +17,7 @@ const booleanResult = getValue(obj, "c");
 type tests = [
   Expect<Equal<typeof numberResult, number>>,
   Expect<Equal<typeof stringResult, string>>,
-  Expect<Equal<typeof booleanResult, boolean>>,
+  Expect<Equal<typeof booleanResult, boolean>>
 ];
 
 export {};

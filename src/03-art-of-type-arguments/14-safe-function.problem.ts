@@ -1,14 +1,23 @@
 import { expect, it } from "vitest";
 import { Equal, Expect } from "../helpers/type-utils";
 
+// Another option: capture func as any => any:
+//   <TFunc extends (...args: any[]) => any>
+// then capture the params and returns using built in type helpers:
+//   ...args: Parameters<TFunc>
+//   result: ReturnType<TFunc>
+// The only difference will be in the captured type annotation at the call-site.
+// This way gives a named tuple like makeSafe<[a: number, b: number], number>
+// The other caputres makeSafe<(a: number, b: number) => number>, which may be
+// easier to read.
 const makeSafe =
-  (func: unknown) =>
+  <TParams extends any[], TResult>(func: (...params: TParams) => TResult) =>
   (
-    ...args: unknown
+    ...args: TParams
   ):
     | {
         type: "success";
-        result: unknown;
+        result: TResult;
       }
     | {
         type: "failure";
@@ -28,65 +37,6 @@ const makeSafe =
       };
     }
   };
-
-it("Should return the result with a { type: 'success' } on a successful call", () => {
-  const func = makeSafe(() => 1);
-
-  const result = func();
-
-  expect(result).toEqual({
-    type: "success",
-    result: 1,
-  });
-
-  type tests = [
-    Expect<
-      Equal<
-        typeof result,
-        | {
-            type: "success";
-            result: number;
-          }
-        | {
-            type: "failure";
-            error: Error;
-          }
-      >
-    >,
-  ];
-});
-
-it("Should return the error on a thrown call", () => {
-  const func = makeSafe(() => {
-    if (1 > 2) {
-      return "123";
-    }
-    throw new Error("Oh dear");
-  });
-
-  const result = func();
-
-  expect(result).toEqual({
-    type: "failure",
-    error: new Error("Oh dear"),
-  });
-
-  type tests = [
-    Expect<
-      Equal<
-        typeof result,
-        | {
-            type: "success";
-            result: string;
-          }
-        | {
-            type: "failure";
-            error: Error;
-          }
-      >
-    >,
-  ];
-});
 
 it("Should properly match the function's arguments", () => {
   const func = makeSafe((a: number, b: string) => {

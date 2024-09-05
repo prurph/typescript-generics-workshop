@@ -1,7 +1,17 @@
 import { expect, it } from "vitest";
 import { Equal, Expect } from "../helpers/type-utils";
 
-const makeInfiniteScroll = (params: unknown) => {
+type InfiniteScroll<TRow> = {
+  key: keyof TRow;
+  initialRows?: TRow[];
+  // You can `await` a regular function and it returns the value directly.
+  // Therefore if we type this as Promise<TRow[]> or just TRow[], the rows can be
+  // fetched in a synchronous or asynchronous fashion, and the implementation is
+  // just `await fetchRows()`.
+  fetchRows: () => Promise<TRow[]> | TRow[];
+};
+
+const makeInfiniteScroll = <T>(params: InfiniteScroll<T>) => {
   const data = params.initialRows || [];
 
   const scroll = async () => {

@@ -1,11 +1,17 @@
 import { expect, it } from "vitest";
 import { Equal, Expect } from "../helpers/type-utils";
 
-const pick = (obj: {}, picked: string[]) => {
+const pick = <TObj, TPicked extends keyof TObj>(
+  obj: TObj,
+  picked: Array<TPicked>
+) => {
+  // Key here is we need to specify return type as the picked keys, otherwise
+  // it's inferred as the parent TObj.
+  // Pick<TObj, TPicked> is just sugar for {[P in TPicked]: TObj[TPicked]}
   return picked.reduce((acc, key) => {
     acc[key] = obj[key];
     return acc;
-  }, {});
+  }, {} as Pick<TObj, TPicked>);
 };
 
 it("Should pick the keys from the object", () => {

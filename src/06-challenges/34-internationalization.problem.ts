@@ -1,12 +1,30 @@
 import { expect, it } from "vitest";
 
-type GetParamKeys<TTranslation extends string> = TTranslation extends ""
-  ? []
-  : TTranslation extends `${string}{${infer Param}}${infer Tail}`
-  ? [Param, ...GetParamKeys<Tail>]
-  : [];
+type GetParamKeys<TTranslation extends string> =
+  TTranslation extends `${string}{${infer Param}}${infer Tail}`
+    ? [Param, ...GetParamKeys<Tail>]
+    : [];
 
-const translate = (translations: unknown, key: unknown, ...args: unknown[]) => {
+// So many subtle things going on here:
+// - Translations extends Record<string, string> to ensure its values can be typed as string
+//   for GetParamKeys
+// - Default type for TParamKeys lets us capture it rather than using GetParamKeys<Translations[TranslationKey]>
+//   everywhere multiple times
+// - TParamKeys extends string[] allows us to use these as keys in the record under args
+// - Record<TParamKeys[number], string> uses indexed access into an array of param keys to
+//   convert it to a type union that becomes the keys of the record. 🤯
+// I was actually pretty close to getting this one! I forgot about the number trick to
+const translate = <
+  Translations extends Record<string, string>,
+  TranslationKey extends keyof Translations,
+  TParamKeys extends string[] = GetParamKeys<Translations[TranslationKey]>
+>(
+  translations: Translations,
+  key: TranslationKey,
+  ...args: TParamKeys extends []
+    ? []
+    : [params: Record<TParamKeys[number], string>]
+) => {
   const translation = translations[key];
   const params: any = args[0] || {};
 
